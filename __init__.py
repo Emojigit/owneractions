@@ -6,11 +6,13 @@ __dname__ = "start"
 #__moreinfo__ = ["Example __moreinfo__"]
 
 from telethon import events, utils
-import config, random, string
+import config, random, string, traceback, asyncio
 helpmsg = []
 helpmsg.append("Commands:")
 helpmsg.append("- help: show this message")
 helpmsg.append("- leave: let the bot kick out itself")
+helpmsg.append("- exec: Run Python codes")
+helpmsg.append("- eval: Run Python expression and get the result")
 helpmsg = "\n".join(helpmsg)
 def randomstr(length):
     return "".join(random.choice(string.ascii_letters) for i in range(length))
@@ -44,9 +46,42 @@ def setup(bot,storage):
                     rstr = randomstr(10)
                     storage.set("confirm_leave_code_" + str(event.chat_id),rstr)
                     await event.respond("⚠️ Do you really want to kick out the bot? If yes, please run: `/owneractions leave {}`".format(rstr))
+            elif subc == "exec":
+                try:
+                    execarg = argv[1]
+                except IndexError:
+                    await event.respond("❌ No code!")
+                    raise events.StopPropagation
+                g = globals().copy()
+                await event.respond("⚙️ Executing...")
+                def newprint(*args, sep=" ", end="\n",**kwargs):
+                    f = asyncio.ensure_future(event.respond(sep.join(str(x) for x in args) + end))
+                g["print"] = newprint
+                try:
+                    exec(execarg,g)
+                except:
+                    await event.respond("❌ Error!\n```" + traceback.format_exc() + "```")
+                else:
+                    await event.respond("✅ Done!")
+            elif subc == "eval":
+                try:
+                    execarg = argv[1]
+                except IndexError:
+                    await event.respond("❌ No code!")
+                    raise events.StopPropagation
+                msgs = ["⚙️ Executing..."]
+                msg = await event.respond("⚙️ Executing...")
+                try:
+                    r = eval(execarg)
+                except:
+                    msgs.append("❌ Error!\n```" + traceback.format_exc() + "```")
+                else:
+                    msgs.append("✅ Done! Result: `{}`".format(r))
+                await msg.edit("\n".join(msgs))
             else:
                 raise IndexError
         except IndexError:
             await event.respond("❌ Invalid subcommand!\n" + helpmsg)
+        raise events.StopPropagation
 
 
