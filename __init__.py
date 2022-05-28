@@ -13,6 +13,7 @@ helpmsg.append("- help: show this message")
 helpmsg.append("- leave: let the bot kick out itself")
 helpmsg.append("- exec: Run Python codes")
 helpmsg.append("- eval: Run Python expression and get the result")
+helpmsg.append("- sendto: Send message as bot to any chat")
 helpmsg = "\n".join(helpmsg)
 def randomstr(length):
     return "".join(random.choice(string.ascii_letters) for i in range(length))
