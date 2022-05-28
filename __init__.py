@@ -6,7 +6,7 @@ __dname__ = "owneractions"
 #__moreinfo__ = ["Example __moreinfo__"]
 
 from telethon import events, utils
-import config, random, string, traceback, asyncio
+import config, random, string, traceback, asyncio, math
 helpmsg = []
 helpmsg.append("Commands:")
 helpmsg.append("- help: show this message")
@@ -71,8 +71,12 @@ def setup(bot,storage):
                     raise events.StopPropagation
                 msgs = ["⚙️ Executing..."]
                 msg = await event.respond("⚙️ Executing...")
+                g = globals()
+                mathfunc = ['acos', 'acosh', 'asin', 'asinh', 'atan', 'atan2', 'atanh', 'ceil', 'copysign', 'cos', 'cosh', 'degrees', 'dist', 'erf', 'erfc', 'exp', 'expm1', 'fabs', 'factorial', 'floor', 'fmod', 'frexp', 'fsum', 'gamma', 'gcd', 'hypot', 'isclose', 'isfinite', 'isinf', 'isnan', 'isqrt', 'ldexp', 'lgamma', 'log', 'log1p', 'log10', 'log2', 'modf', 'pow', 'radians', 'remainder', 'sin', 'sinh', 'sqrt', 'tan', 'tanh', 'trunc', 'prod', 'perm', 'comb', 'pi', 'e', 'tau', 'inf', 'nan']
+                for x in mathfunc:
+                    g[x] = getattr(math,x)
                 try:
-                    r = eval(execarg)
+                    r = eval(execarg,g)
                 except:
                     msgs.append("❌ Error!\n```" + traceback.format_exc() + "```")
                 else:
