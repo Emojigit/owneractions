@@ -2,7 +2,7 @@ __author__ = "Emoji"
 __version__ = "1.0.0"
 __url__ = "https://github.com/Emojigit/owneractions"
 __description__ = "Let the bot owner to control the bot"
-__dname__ = "start"
+__dname__ = "owneractions"
 #__moreinfo__ = ["Example __moreinfo__"]
 
 from telethon import events, utils
@@ -58,7 +58,7 @@ def setup(bot,storage):
                     f = asyncio.ensure_future(event.respond(sep.join(str(x) for x in args) + end))
                 g["print"] = newprint
                 try:
-                    exec(execarg,g)
+                    exec(execarg,g,locals())
                 except:
                     await event.respond("❌ Error!\n```" + traceback.format_exc() + "```")
                 else:
@@ -78,6 +78,31 @@ def setup(bot,storage):
                 else:
                     msgs.append("✅ Done! Result: `{}`".format(r))
                 await msg.edit("\n".join(msgs))
+            elif subc == "sendto":
+                try:
+                    group, msg = argv[1].split(" ",1)
+                except ValueError:
+                    await event.respond("❌ Missing arguments!")
+                    raise events.StopPropagation
+                try:
+                    group = int(group)
+                except ValueError:
+                    if group[0] == "@":
+                        group = group[1:]
+                try:
+                    group = await bot.get_input_entity(group)
+                    if group == None:
+                        raise ValueError
+                except ValueError:
+                    await event.respond("❌ Target not found!")
+                    raise events.StopPropagation
+                await event.respond("⚙️ Sending...")
+                try:
+                    await bot.send_message(group,msg)
+                except Exception as e:
+                    await event.respond("❌ Message not sent, error occured!\n" + e.__str__())
+                else:
+                    await event.respond("✅ Done!")
             else:
                 raise IndexError
         except IndexError:
