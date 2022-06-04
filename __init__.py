@@ -6,7 +6,7 @@ __dname__ = "owneractions"
 #__moreinfo__ = ["Example __moreinfo__"]
 
 from telethon import events, utils
-import config, random, string, traceback, asyncio, math
+import config, random, string, traceback, asyncio, math, os, sys
 helpmsg = []
 helpmsg.append("Commands:")
 helpmsg.append("- help: show this message")
@@ -18,6 +18,10 @@ helpmsg = "\n".join(helpmsg)
 def randomstr(length):
     return "".join(random.choice(string.ascii_letters) for i in range(length))
 def setup(bot,storage):
+    last_shutdown = storage.get("restart_chat",0)
+    if last_shutdown != 0:
+        bot.loop.create_task(bot.send_message(last_shutdown,"✅ Restarted!"))
+        last_shutdown = storage.set("restart_chat",0)
     @bot.on(events.NewMessage(pattern="/owneractions"))
     async def owneractions_cmd(event):
         sender = event.sender
@@ -108,6 +112,14 @@ def setup(bot,storage):
                     await event.respond("❌ Message not sent, error occured!\n" + e.__str__())
                 else:
                     await event.respond("✅ Done!")
+            elif subc == "restart":
+                await event.respond("⚙️ Restarting...")
+                storage.set("restart_chat",event.chat.id)
+                os.spawnv(os.P_NOWAIT, sys.executable, [sys.executable] + sys.argv)
+                sys.exit(0)
+            elif subc == "stop":
+                await event.respond("✅ Bot shut down.")
+                sys.exit(0)
             else:
                 raise IndexError
         except IndexError:
